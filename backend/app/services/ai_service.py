@@ -13,15 +13,28 @@ except ImportError:
 
 class AIService:
     def __init__(self):
-        self.api_key = settings.OPENAI_API_KEY
+        self.groq_api_key = getattr(settings, "GROQ_API_KEY", "")
+        self.openai_api_key = settings.OPENAI_API_KEY
         self.model = settings.AI_MODEL
         self.client = None
         
-        if client_available and self.api_key:
-            try:
-                self.client = OpenAI(api_key=self.api_key)
-            except Exception:
-                self.client = None
+        if client_available:
+            if self.groq_api_key:
+                try:
+                    self.client = OpenAI(
+                        api_key=self.groq_api_key,
+                        base_url="https://api.groq.com/openai/v1"
+                    )
+                    # Default to a Groq-compatible model if current model is OpenAI-specific
+                    if self.model == "gpt-4o-mini" or self.model.startswith("gpt-"):
+                        self.model = "llama-3.3-70b-versatile"
+                except Exception:
+                    self.client = None
+            elif self.openai_api_key:
+                try:
+                    self.client = OpenAI(api_key=self.openai_api_key)
+                except Exception:
+                    self.client = None
 
     def generate_response(self, prompt: str, chat_history: List[Dict[str, str]] = None) -> str:
         """

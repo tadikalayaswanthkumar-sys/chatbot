@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
     OPENAI_API_KEY: str = ""
     AI_MODEL: str = "gpt-4o-mini"
+    GROQ_API_KEY: str = ""
 
     @property
     def cors_origins(self) -> List[str]:
