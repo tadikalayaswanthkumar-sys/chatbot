@@ -144,7 +144,7 @@ class AIService:
         # Default fallback responses
         responses = [
             f"Thank you for sharing that! As a simulated assistant, I'm analyzing your query about: \"{user_msg}\".\n\nIs there anything specific you would like me to draft, solve, or research for you?",
-            f"I hear you! That sounds like an interesting topic. Let me know how I can assist with that in detail.\n\n*(Note: You can unlock real AI responses by adding your `OPENAI_API_KEY` to the `backend/.env` file and restarting the backend server)*.",
+            f"I hear you! That sounds like an interesting topic. Let me know how I can assist with that in detail.\n\n*(Note: You can unlock real AI responses by adding your `GROQ_API_KEY` to the `backend/.env` file and restarting the backend server)*.",
             "I'm here to help! Could you provide a bit more context or specify what you'd like to achieve? That way, I can give you a more detailed and tailored response."
         ]
         return random.choice(responses)
