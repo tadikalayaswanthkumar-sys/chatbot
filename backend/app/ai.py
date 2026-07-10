@@ -1,15 +1,23 @@
 import time
 import random
 from typing import List, Dict
-from app.core.config import settings
-from app.core.prompt import get_system_prompt
+from app.database import settings
 
-# Conditionally import OpenAI to avoid crash if not installed, though listed in requirements
 try:
     from openai import OpenAI
     client_available = True
 except ImportError:
     client_available = False
+
+SYSTEM_PROMPT = (
+    "You are a helpful, professional, and friendly AI chatbot assistant. "
+    "Your goal is to provide accurate, clear, and context-aware responses to the user's queries.\n\n"
+    "Adhere to the following guidelines:\n"
+    "1. Be polite, concise, and structured in your explanations.\n"
+    "2. Use markdown formatting when formatting lists, bold text, or code snippets to enhance readability.\n"
+    "3. If you do not know the answer to a question, admit it politely rather than fabricating info.\n"
+    "4. Keep track of the conversation context to provide coherent multi-turn dialogues."
+)
 
 class AIService:
     def __init__(self):
@@ -25,7 +33,6 @@ class AIService:
                         api_key=self.groq_api_key,
                         base_url="https://api.groq.com/openai/v1"
                     )
-                    # Default to a Groq-compatible model if current model is OpenAI-specific
                     if self.model == "gpt-4o-mini" or self.model.startswith("gpt-"):
                         self.model = "llama-3.3-70b-versatile"
                 except Exception:
@@ -37,14 +44,7 @@ class AIService:
                     self.client = None
 
     def generate_response(self, prompt: str, chat_history: List[Dict[str, str]] = None) -> str:
-        """
-        Generates an AI response based on the current prompt and chat history.
-        Uses OpenAI if the key is provided, otherwise falls back to a simulated AI response.
-        """
-        system_prompt = get_system_prompt()
-        
-        # Build messages list
-        messages = [{"role": "system", "content": system_prompt}]
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
         
         if chat_history:
             for msg in chat_history:
@@ -61,15 +61,11 @@ class AIService:
                 )
                 return response.choices[0].message.content
             except Exception as e:
-                # If real API fails (e.g. rate limit, invalid key), fallback to simulation with error note
                 return f"[API Error: {str(e)}]\n\n{self._generate_simulated_response(prompt)}"
         else:
             return self._generate_simulated_response(prompt)
 
     def generate_title(self, first_message: str) -> str:
-        """
-        Generates a short, context-appropriate title for a conversation.
-        """
         if self.client:
             try:
                 response = self.client.chat.completions.create(
@@ -85,20 +81,13 @@ class AIService:
             except Exception:
                 pass
         
-        # Simple fallback title generation
         words = first_message.split()
         if len(words) > 5:
             return " ".join(words[:4]) + "..."
         return " ".join(words)
 
     def _generate_simulated_response(self, user_msg: str) -> str:
-        """
-        A simulated AI response engine for development without API keys.
-        Supports keyword mapping to look smart and responsive.
-        """
-        # Sleep to simulate network delay
         time.sleep(random.uniform(0.5, 1.2))
-        
         user_msg_lower = user_msg.lower()
         
         if "hello" in user_msg_lower or "hi" in user_msg_lower or "hey" in user_msg_lower:
@@ -141,7 +130,6 @@ class AIService:
                 "Would you like to explore any of these points in more depth?"
             )
             
-        # Default fallback responses
         responses = [
             f"Thank you for sharing that! As a simulated assistant, I'm analyzing your query about: \"{user_msg}\".\n\nIs there anything specific you would like me to draft, solve, or research for you?",
             f"I hear you! That sounds like an interesting topic. Let me know how I can assist with that in detail.\n\n*(Note: You can unlock real AI responses by adding your `GROQ_API_KEY` to the `backend/.env` file and restarting the backend server)*.",

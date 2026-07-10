@@ -1,7 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
-import Chat from './pages/Chat'
-import NotFound from './pages/NotFound'
+import { Home, Chat, NotFound } from './pages.jsx'
 
 function App() {
   return (
