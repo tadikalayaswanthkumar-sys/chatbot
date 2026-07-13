@@ -48,7 +48,7 @@ def health_check():
         "status": "healthy",
         "app_name": settings.APP_NAME,
         "debug_mode": settings.DEBUG,
-        "ai_fallback": not has_live_key
+        "ai_fallback": not has_live_key                                      
     }
 
 # Conversations Routes
